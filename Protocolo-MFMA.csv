@@ -1,0 +1,48 @@
+﻿ID,Fase_Modulo,Horario_Janela,Categoria,Protocolo,Objetivo_Beneficio,Instrucoes_Acao,Dicas_Cuidados
+1,Fase 1 (Manhã),Ao acordar (Primeiras horas),Despertar & Respiração,Respiração Wim Hof,"Oxigenação profunda, aumento imediato de foco, liberação de hormônios de alerta e bem-estar.","1. Sente-se ou deite-se em local seguro.
+2. Faça 30 respirações profundas e rápidas (inala nariz/abdômen, exala boca).
+3. Solte o ar e segure em apneia com pulmão vazio o máximo que conseguir.
+4. Inspire fundo e retenha por 15 segundos.
+5. Repita por 3 a 4 rodadas.","Nunca realize na água, no banho ou dirigindo (risco de tontura/desmaio)."
+2,Fase 1 (Manhã),Ao acordar (Alternativa),Cardio & Termogênese,Cardio em Jejum,"Acelera o metabolismo, auxilia na queima de gordura e libera endorfinas/dopamina para alerta matinal.","1. Hidrate-se bem antes de iniciar.
+2. Pratique caminhada rápida, corrida leve ou pedalada de 15 a 30 minutos em jejum.
+3. Mantenha intensidade moderada e constante.","Beba água antes, especialmente se o exercício passar de 20 minutos."
+3,Fase 1 (Manhã),Pós-Respiração ou Pós-Cardio,Termogênese & Alerta,Banho Gelado (Exposição ao Frio),"Melhora circulação, desperta o sistema nervoso simpático, eleva a tolerância ao estresse térmico e melhora humor.","1. Tome seu banho em temperatura habitual.
+2. Finalize com água fria/gelada durante 30 segundos a 2 minutos.
+3. Mantenha a respiração controlada durante a exposição fria.",Consulte um médico se possuir histórico cardiovascular ou respiratório.
+4,Fase 1 (Manhã),Logo após as práticas matinais,Nutrição Estratégica,Café da Manhã Proteico,"Aumenta saciedade prolongada, evita picos e quedas de glicemia/energia e auxilia na manutenção da massa magra.","Consuma fontes densas em proteína: ovos mexidos/cozidos, queijos magros (cottage/ricota), iogurte natural sem açúcar com frutas vermelhas ou shake de whey protein.",Evite sair de casa sem essa refeição para não sucumbir a lanches calóricos e hiperglicêmicos no meio da manhã.
+5,Fase 1 (Manhã),30 a 60 min após o café / Pré-foco,Neuroperformance,Cafeína Estratégica,"Aumenta a sensibilidade dos receptores de dopamina, elevando a motivação para tarefas árduas ou monótonas.","1. Consuma 1 xícara de café de qualidade ou chá verde/preto 30 a 60 min pós-refeição.
+2. Inicie imediatamente a tarefa que demanda maior esforço cognitivo.","Use com moderação como ferramenta pontual. Se for sensível, reduza a dose ou use chás suaves."
+6,Fase 1 (Manhã),2 a 4 horas após acordar,Produtividade & Ergonomia,Organização de Tarefas de Alto Foco,Aproveita o pico de clareza mental e capacidade cognitiva para resolução de problemas complexos.,"1. Aloque as tarefas mais densas (estudos, projetos, decisões) nesta janela matinal.
+2. Posicione a tela/monitor na linha ou acima dos olhos para manter estado de alerta e proteger a cervical.
+3. Utilize ruído branco ou fones com cancelamento de ruído em ambientes ruidosos.",Elimine notificações do celular e distrações digitais durante esta janela.
+7,Fase 2 (Tarde),Pré-Almoço (Final da manhã / Início da tarde),Treino & Condicionamento,Treino Intenso Pré-Almoço,"Pico de dopamina e noradrenalina para a tarde, melhora do humor, clareza mental e autorregulação do apetite.","Realize uma sessão de até 45-60 min:
+- HIIT de 20 a 30 minutos;
+- Musculação focada com séries intensas e intervalos curtos; OU
+- Corrida rápida / tiros intervalados.",Mantenha o treino objetivo em menos de 1 hora para não elevar excessivamente o cortisol.
+8,Fase 2 (Tarde),Pós-Almoço (Início da tarde),Nutrição & Digestão,Almoço Balanceado & Estabilização Glicêmica,Digestão eficiente sem sonolência excessiva pós-prandial e manutenção de glicose estável.,"1. Monte o prato com carboidratos complexos (arroz integral, batata-doce, quinoa) + proteínas magras.
+2. Substitua refrigerantes por água e prefira frutas como sobremesa natural.",Evite refeições ricas em gorduras saturadas pesadas e açúcares refinados.
+9,Fase 2 (Tarde),Pós-Almoço (13:00 - 14:30),Recuperação Neural,NSDR (Non-Sleep Deep Rest),"Restaura estoques de energia mental, 'reseta' o córtex pré-frontal e melhora a consolidação e foco da tarde.","1. Sente-se ou deite-se confortavelmente em local silencioso (10 a 20 min).
+2. Faça 3 respirações profundas com expiração prolongada.
+3. Execute Body Scan (varredura corporal mental da cabeça aos pés).
+4. Pratique interocepção (foco nos batimentos e ritmo respiratório).","Se não puder deitar, 10 minutos de olhos fechados sentado com respiração lenta já surtem efeito expressivo."
+10,Fase 2 (Tarde),Meio da Tarde (14:30 - 17:30),Foco Imersivo & Neuroacústica,Deep Work com Binaural Beats (40 Hz),"Indução de ondas gama no córtex, aprimorando memória operacional, retenção e sustentação da atenção.","1. Isole bloco ininterrupto para tarefas de imersão (gravações, redação, análises densas).
+2. Use fones de ouvido estéreo com faixa sonora de ondas binaurais em 40 Hz (ou ruído branco).
+3. Bloqueie todas as abas e notificações externas.",Fones estéreo são obrigatórios para que a diferença de frequência binaural entre os ouvidos funcione.
+11,Fase 2 (Tarde / Fim de Tarde),17:00 - 18:30 (Fim de tarde),Ritmo Circadiano & Movimento,Exposição ao Pôr do Sol & Treino Tardio,"Sinalização circadiana para transição dia-noite, liberação de tensões acumuladas e calibragem da melatonina.","1. Caminhada ao ar livre contemplando a luz natural do fim de tarde / poente (5 a 15 min).
+2. Caso não tenha treinado antes do almoço, realize sua sessão de exercícios físicos neste horário.",Evite treinos de intensidade extrema a menos de 2 horas antes de dormir.
+12,Fase 3 (Noite),2 horas antes de dormir,Higiene do Sono & Melatonina,Gestão de Luzes & Ambiente Térmico,Desbloqueio natural da síntese de melatonina e facilitação do início do estágio NREM profundo.,"1. Diminua luzes do teto e use iluminação baixa e quente (amarelada/alaranjada).
+2. Reduza o brilho de telas e ative filtros de luz azul.
+3. Mantenha a temperatura do quarto fresca/fria para induzir queda da temperatura corporal central.",Evite refeições pesadas ou cafeína neste período.
+13,Fase 3 (Noite),Pré-Cama / Na Cama,Desaceleração Neural,Suspiro Fisiológico Noturno,"Desaceleração instantânea do tônus autonômico simpático, redução da frequência cardíaca e relaxamento muscular.","1. Inspire profundamente pelo nariz até encher a maior parte dos pulmões.
+2. Dê uma 'segunda inspiração curta' (topada de ar) pelo nariz para abrir os alvéolos.
+3. Solte o ar pela boca de forma longa, suave e completa.
+4. Repita de 2 a 3 ciclos.",Pode ser repetido caso desperte no meio da noite com a mente acelerada.
+14,Fase 3 (Noite),Consistência Diária,Arquitetura Circadiana,Janela de Sono Regular,Ancoragem circadiana e previsibilidade biológica dos ciclos REM e de sono profundo.,"1. Deite-se e levante-se rigorosamente no mesmo horário todos os dias (tolerância máxima de +/- 1 hora).
+2. Programe 7 a 9 horas de permanência na cama em quarto completamente escuro.",Não use o botão soneca (snooze); levante assim que o alarme despertar.
+15,SOS Recuperação,Pós-Noite Mal Dormida (Manhã),Reset Circadiano de Emergência,Protocolo SOS Sono: Manhã & Cafeína Tardia,Evita o efeito de jet-lag social e previne o colapso de adenosina à tarde.,"1. Não estenda o horário de acordar (levante no horário habitual).
+2. Exponha-se a 5-10 minutos de luz natural solar direta logo ao despertar para ancorar pico de cortisol.
+3. Adie a ingestão de cafeína por 90 a 120 minutos para permitir a depuração inicial de adenosina.",Resista à tentação de tomar café nos primeiros minutos após abrir os olhos.
+16,SOS Recuperação,Pós-Noite Mal Dormida (Tarde),Recuperação Cerebral de Emergência,Protocolo SOS Sono: Movimento & NSDR Reparador,Compensa o déficit cognitivo noturno e estimula ondas cerebrais restauradoras para a noite seguinte.,"1. Realize exercício físico leve a moderado mais cedo para liberar endorfinas.
+2. No início da tarde, faça uma pausa obrigatória de 10 a 20 min de NSDR em vez de tomar doses extras de café.
+3. Mantenha hidratação e refeições leves.",Não ingira cafeína após as 14h para garantir que a noite seguinte recupere a qualidade do sono.
