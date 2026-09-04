@@ -1,0 +1,11 @@
+# Python virtual environments & cache
+.venv/
+__pycache__/
+*.pyc
+
+# Confidential documents & PDFs
+*.pdf
+
+# Temporary files
+*.tmp
+*.log
