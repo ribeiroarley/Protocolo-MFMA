@@ -2,19 +2,7 @@
  * ============================================================================
  * PROJETO: Protocolo MFMA - Otimização de Rotina e Neuroperformance
  * ARQUIVO: Protocolo-MFMA.js
- * FINALIDADE: Atualização perpétua e automatizada das diretrizes e protocolos
- *             do MFMA nas notas da tarefa diária do Google Tasks.
- * 
- * PADRÃO ARQUITETURAL:
- *  - CONFIG_MFMA centralizado e parametrizável
- *  - Suporte a Tasks API com tratamento de fallback ('Tasks' e 'GoogleTasks')
- *  - Normalização Unicode NFD ('normalizarTexto') imune a acentos e formatações mobile
- *  - Busca resiliente multilista com paginação ('nextPageToken')
- *  - Flags 'showCompleted: true' e 'showHidden: true' (localiza mesmo arquivadas)
- *  - Reativação automática com 'status: "needsAction"' e 'completed: null'
- *  - Disparo oficial diário via trigger matinal com avanço sequencial seguro
- *  - Modo de teste imediato com auto-criação e vencimento em +2 min (sem avançar cronograma)
- *  - Funções de manutenção manual (definirFaseManual e definirFaseInicial)
+ * VERSÃO: 2.0 (Resiliência Total com Auto-Alinhamento de Vencimento 'due')
  * ============================================================================
  */
 
@@ -22,14 +10,16 @@
  * Configurações Globais Parametrizáveis
  */
 const CONFIG_MFMA = {
-  TASK_TITLE_KEYWORD: "Protocolo MFMA", // Palavra-chave contida no título da tarefa
-  TASK_LIST_NAME: null,                 // Deixe null para varrer TODAS as listas ou defina o nome exato (ex: "Meu Dia")
-  SHEET_NAME: null,                     // Deixe null para usar a aba ativa ou especifique ex: "Protocolo-MFMA"
-  PROP_KEY_FASE_ATUAL: "FASE_MFMA_ATUAL" // Chave de persistência de estado no PropertiesService
+  TASK_TITLE_KEYWORD: "Protocolo MFMA",  // Palavra-chave identificadora no título
+  TASK_LIST_NAME: null,                  // null = varre todas as listas
+  SHEET_NAME: null,                      // null = aba ativa
+  PROP_KEY_FASE_ATUAL: "FASE_MFMA_ATUAL",// Chave do contador sequencial
+  HORA_VENCIMENTO_PADRAO: 7,             // 07:00 da manhã
+  MINUTO_VENCIMENTO_PADRAO: 0
 };
 
 /**
- * Mapeamento de emojis temáticos por categoria/módulo
+ * Emojis temáticos por categoria
  */
 const EMOJIS_CATEGORIA = {
   "Despertar & Respiração": "🫁",
@@ -51,8 +41,7 @@ const EMOJIS_CATEGORIA = {
 };
 
 /**
- * Obtém a referência do serviço Google Tasks com suporte a fallback de identificadores
- * @returns {Object} Serviço Tasks ativo
+ * Retorna o serviço Tasks com suporte a fallback
  */
 function getTasksService() {
   if (typeof Tasks !== 'undefined') {
@@ -61,7 +50,7 @@ function getTasksService() {
     return GoogleTasks;
   } else {
     throw new Error(
-      "Serviço Google Tasks Advanced não encontrado. Adicione o serviço 'Tasks API' em Serviços (Services) no painel esquerdo do Google Apps Script."
+      "Serviço Google Tasks Advanced não encontrado. Adicione o serviço 'Tasks API' em Serviços (Services) no painel esquerdo."
     );
   }
 }
@@ -70,19 +59,18 @@ function getTasksService() {
  * ============================================================================
  * FUNÇÃO DE PRODUÇÃO (TRIGGER MATINAL DIÁRIO)
  * ============================================================================
- * Executa automaticamente todas as madrugadas (idealmente entre 04:00 e 06:00).
- * Lê o protocolo sequencial atual, atualiza a tarefa no Google Tasks e avança o contador.
+ * Executa todas as madrugadas via acionador de tempo (04:00 às 06:00).
  */
 function atualizarProtocoloDiario() {
   try {
     Logger.log("[PRODUÇÃO] Iniciando execução diária do Protocolo MFMA...");
     const atualizadoComSucesso = processarAtualizacaoProtocolo({
-      autoCriar: false,
+      autoCriar: true,
       avancarContador: true
     });
 
     if (!atualizadoComSucesso) {
-      Logger.log("[AVISO] A tarefa não pôde ser atualizada. O ponteiro de fase foi mantido para nova tentativa.");
+      Logger.log("[AVISO] Falha ao processar atualização diária.");
     }
   } catch (error) {
     Logger.log(`[ERRO CRÍTICO EM PRODUÇÃO] ${error.message}`);
@@ -92,19 +80,17 @@ function atualizarProtocoloDiario() {
 
 /**
  * ============================================================================
- * MODO DE TESTE IMEDIATO (COM AUTO-CRIAÇÃO E ALERTA EM +2 MIN)
+ * MODO DE TESTE IMEDIATO (+2 MINUTOS)
  * ============================================================================
- * - Se a tarefa não existir, cria automaticamente na lista padrão (@default)
- *   com horário de vencimento em +2 minutos para testar a notificação push.
- * - Atualiza as notas com o protocolo corrente.
- * - NÃO altera o contador sequencial (permite testar à vontade sem avançar o cronograma).
+ * Testa push notification no celular sem avançar o contador do cronograma.
  */
 function executarTesteImediatoAgora() {
   try {
     Logger.log("[TESTE IMEDIATO] Executando teste do Protocolo MFMA com auto-criação ativa (sem avançar contador)...");
     processarAtualizacaoProtocolo({
       autoCriar: true,
-      avancarContador: false
+      avancarContador: false,
+      testeImediato2Min: true
     });
   } catch (error) {
     Logger.log(`[ERRO NO TESTE IMEDIATO] ${error.message}`);
@@ -113,14 +99,7 @@ function executarTesteImediatoAgora() {
 }
 
 /**
- * ============================================================================
- * TESTE ESPECÍFICO DE UM PROTOCOLO / ID
- * ============================================================================
- * Injeta na tarefa as diretrizes de um ID específico (ex: ID 1 ou ID 9) para conferência,
- * sem alterar o ponteiro do cronograma.
- * Exemplo de uso: testarProtocoloEspecifico(9)
- * 
- * @param {number|string} idProtocolo - Número do ID da planilha a ser testado
+ * Injeta um ID específico para teste sem alterar o contador.
  */
 function testarProtocoloEspecifico(idProtocolo) {
   const idAlvo = parseInt(idProtocolo || 1, 10);
@@ -134,10 +113,7 @@ function testarProtocoloEspecifico(idProtocolo) {
 }
 
 /**
- * Orquestrador principal da leitura do Sheets, montagem do payload e injeção na Tasks API.
- * 
- * @param {Object} opcoes - { autoCriar: boolean, avancarContador: boolean, idForcado: number|null }
- * @returns {boolean} true se atualizado/criado com sucesso
+ * Orquestrador principal com alinhamento rigoroso de data e reativação.
  */
 function processarAtualizacaoProtocolo(opcoes) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -158,20 +134,19 @@ function processarAtualizacaoProtocolo(opcoes) {
     throw new Error("A planilha de protocolos está vazia ou possui apenas o cabeçalho.");
   }
 
-  // 1. Obter ID do protocolo a ser processado
+  // 1. Obter ID do protocolo
   const props = PropertiesService.getScriptProperties();
   let idAtual = opcoes.idForcado 
     ? opcoes.idForcado 
     : parseInt(props.getProperty(CONFIG_MFMA.PROP_KEY_FASE_ATUAL) || "1", 10);
 
-  const totalProtocolos = dados.length - 1; // Desconsiderando cabeçalho
+  const totalProtocolos = dados.length - 1;
   if (idAtual > totalProtocolos || idAtual < 1) {
-    Logger.log(`[CICLO REINICIADO] Ponteiro (${idAtual}) excedeu total (${totalProtocolos}). Reiniciando no ID 1.`);
+    Logger.log(`[CICLO REINICIADO] Ponteiro (${idAtual}) fora dos limites (1-${totalProtocolos}). Reiniciando no ID 1.`);
     idAtual = 1;
   }
 
-  // 2. Localizar a linha correspondente ao ID na planilha
-  // Colunas esperadas: ID, Fase_Modulo, Horario_Janela, Categoria, Protocolo, Objetivo_Beneficio, Instrucoes_Acao, Dicas_Cuidados
+  // 2. Localizar registro correspondente
   let linhaProtocolo = null;
   for (let i = 1; i < dados.length; i++) {
     const rowId = parseInt(dados[i][0], 10);
@@ -182,7 +157,6 @@ function processarAtualizacaoProtocolo(opcoes) {
   }
 
   if (!linhaProtocolo) {
-    // Fallback para índice direto caso IDs não sejam sequenciais
     const indiceFallback = ((idAtual - 1) % totalProtocolos) + 1;
     linhaProtocolo = dados[indiceFallback];
   }
@@ -200,22 +174,35 @@ function processarAtualizacaoProtocolo(opcoes) {
 
   Logger.log(`[PROTOCOLO CARREGADO] ID ${itemProtocolo.id}: "${itemProtocolo.protocolo}" (${itemProtocolo.faseModulo})`);
 
-  // 3. Montar o texto formatado para as notas da tarefa
+  // 3. Montar títulos e notas
   const notasFormatadas = formatarNotaProtocolo(itemProtocolo, totalProtocolos);
+  const tituloDinamico = `⚡ ${CONFIG_MFMA.TASK_TITLE_KEYWORD}: ${itemProtocolo.protocolo}`;
 
-  // 4. Localizar a tarefa em TODAS as listas do usuário
+  // 4. Calcular data de vencimento (due) exata para evitar tarefas atrasadas ("Há X dias")
+  let dataVencimento;
+  if (opcoes.testeImediato2Min) {
+    dataVencimento = new Date(Date.now() + 2 * 60 * 1000); // +2 minutos
+  } else {
+    dataVencimento = new Date();
+    dataVencimento.setHours(CONFIG_MFMA.HORA_VENCIMENTO_PADRAO, CONFIG_MFMA.MINUTO_VENCIMENTO_PADRAO, 0, 0);
+  }
+
+  // 5. Localizar tarefa existente
   const tasksService = getTasksService();
   const resultadoBusca = localizarTarefaEmTodasAsListas(tasksService, CONFIG_MFMA.TASK_TITLE_KEYWORD, CONFIG_MFMA.TASK_LIST_NAME);
 
   if (resultadoBusca) {
     const { taskListId, taskListName, task } = resultadoBusca;
     
+    // Atualização completa
+    task.title = tituloDinamico;
     task.notes = notasFormatadas;
     task.status = "needsAction";
     task.completed = null;
+    task.due = dataVencimento.toISOString(); // Atualiza a data para HOJE
 
     tasksService.Tasks.patch(task, taskListId, task.id);
-    Logger.log(`[SUCESSO] Tarefa "${task.title}" (ID: ${task.id}) na lista "${taskListName}" atualizada para Protocolo #${itemProtocolo.id}!`);
+    Logger.log(`[SUCESSO] Tarefa "${task.title}" (ID: ${task.id}) na lista "${taskListName}" atualizada para Protocolo #${itemProtocolo.id} com vencimento alinhado para ${dataVencimento.toLocaleTimeString('pt-BR')}!`);
 
     if (opcoes.avancarContador) {
       const proximoId = (idAtual % totalProtocolos) + 1;
@@ -225,12 +212,9 @@ function processarAtualizacaoProtocolo(opcoes) {
 
     return true;
   } else {
-    Logger.log(`[NÃO ENCONTRADA] Nenhuma tarefa contendo "${CONFIG_MFMA.TASK_TITLE_KEYWORD}" foi localizada.`);
-    
     if (opcoes.autoCriar) {
-      const dataVencimento = new Date(Date.now() + 2 * 60 * 1000); // Daqui a 2 minutos
       const payloadNovaTarefa = {
-        title: `⚡ ${CONFIG_MFMA.TASK_TITLE_KEYWORD}: ${itemProtocolo.protocolo}`,
+        title: tituloDinamico,
         notes: notasFormatadas,
         due: dataVencimento.toISOString(),
         status: "needsAction"
@@ -239,28 +223,28 @@ function processarAtualizacaoProtocolo(opcoes) {
       const listaDestino = CONFIG_MFMA.TASK_LIST_NAME || "@default";
       const tarefaCriada = tasksService.Tasks.insert(payloadNovaTarefa, listaDestino);
       
-      Logger.log(`[AUTO-CRIAÇÃO REALIZADA] Tarefa criada com sucesso na lista "${listaDestino}"!`);
-      Logger.log(`ID: ${tarefaCriada.id} | Vencimento configurado para: ${dataVencimento.toLocaleTimeString('pt-BR')} (+2 min para teste imediato de notificação push)`);
+      Logger.log(`[AUTO-CRIAÇÃO REALIZADA] Tarefa criada com sucesso na lista "${listaDestino}" (ID: ${tarefaCriada.id})!`);
+      
+      if (opcoes.avancarContador) {
+        const proximoId = (idAtual % totalProtocolos) + 1;
+        props.setProperty(CONFIG_MFMA.PROP_KEY_FASE_ATUAL, String(proximoId));
+      }
       return true;
     }
     
+    Logger.log(`[NÃO ENCONTRADA] Nenhuma tarefa contendo "${CONFIG_MFMA.TASK_TITLE_KEYWORD}" foi localizada.`);
     return false;
   }
 }
 
 /**
- * Formata os detalhes do protocolo em um layout limpo, escaneável e rico em emojis para o Google Tasks
- * 
- * @param {Object} item - Objeto com dados do protocolo
- * @param {number} totalProtocolos - Total de protocolos no cronograma
- * @returns {string} Texto estruturado pronto para a propriedade notes
+ * Layout enriquecido para as notas da tarefa
  */
 function formatarNotaProtocolo(item, totalProtocolos) {
   const emoji = EMOJIS_CATEGORIA[item.categoria] || "⚡";
 
   let texto = `${emoji} PROTOCOLO MFMA | MÓDULO #${item.id} de ${totalProtocolos}\n`;
   texto += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-  
   texto += `📌 FASE / MÓDULO: ${item.faseModulo}\n`;
   if (item.horarioJanela) {
     texto += `⏰ JANELA HORÁRIA: ${item.horarioJanela}\n`;
@@ -271,11 +255,9 @@ function formatarNotaProtocolo(item, totalProtocolos) {
   if (item.objetivo) {
     texto += `💡 OBJETIVO & IMPACTO BIOLÓGICO:\n${item.objetivo}\n\n`;
   }
-
   if (item.instrucoes) {
     texto += `📋 AÇÃO RECOMENDADA / PASSO A PASSO:\n${item.instrucoes}\n\n`;
   }
-
   if (item.dicas) {
     texto += `⚠️ ATENÇÃO & DICAS PRÁTICAS:\n${item.dicas}\n\n`;
   }
@@ -287,17 +269,11 @@ function formatarNotaProtocolo(item, totalProtocolos) {
 }
 
 /**
- * Varre com resiliência as listas de tarefas com suporte a paginação e normalização Unicode
- * 
- * @param {Object} tasksService - Instância da Tasks API
- * @param {string} palavraChave - Palavra a ser buscada no título da tarefa
- * @param {string|null} nomeListaEspecifica - Nome exato da lista ou null para todas
- * @returns {Object|null} Objeto com { taskListId, taskListName, task } ou null
+ * Busca resiliente multilista
  */
 function localizarTarefaEmTodasAsListas(tasksService, palavraChave, nomeListaEspecifica) {
   const termoNormalizado = normalizarTexto(palavraChave);
   
-  // 1. Obter todas as listas
   let listas = [];
   let pageTokenListas = null;
   do {
@@ -312,22 +288,16 @@ function localizarTarefaEmTodasAsListas(tasksService, palavraChave, nomeListaEsp
   } while (pageTokenListas);
 
   if (!listas || listas.length === 0) {
-    Logger.log("[AVISO] Nenhuma lista de tarefas encontrada na conta.");
     return null;
   }
 
-  // Filtrar se especificado nome da lista
   let listasAlvo = listas;
   if (nomeListaEspecifica) {
     const nomeNorm = normalizarTexto(nomeListaEspecifica);
     listasAlvo = listas.filter(l => normalizarTexto(l.title) === nomeNorm);
-    if (listasAlvo.length === 0) {
-      Logger.log(`[AVISO] Lista especificada "${nomeListaEspecifica}" não encontrada. Varreremos todas as listas.`);
-      listasAlvo = listas;
-    }
+    if (listasAlvo.length === 0) listasAlvo = listas;
   }
 
-  // 2. Varrer as tarefas de cada lista
   for (const lista of listasAlvo) {
     let pageTokenTarefas = null;
     do {
@@ -344,7 +314,6 @@ function localizarTarefaEmTodasAsListas(tasksService, palavraChave, nomeListaEsp
           
           const tituloNormalizado = normalizarTexto(tarefa.title);
           if (tituloNormalizado.includes(termoNormalizado)) {
-            Logger.log(`[ENCONTRADA] Tarefa "${tarefa.title}" localizada na lista "${lista.title}".`);
             return {
               taskListId: lista.id,
               taskListName: lista.title,
@@ -361,9 +330,7 @@ function localizarTarefaEmTodasAsListas(tasksService, palavraChave, nomeListaEsp
 }
 
 /**
- * Remove acentos, caracteres diacríticos e formatações móveis para comparação segura
- * @param {string} texto - Texto original
- * @returns {string} Texto minúsculo e sem acentos
+ * Normalização Unicode
  */
 function normalizarTexto(texto) {
   if (!texto) return "";
@@ -376,35 +343,19 @@ function normalizarTexto(texto) {
 
 /**
  * ============================================================================
- * FUNÇÕES DE MANUTENÇÃO MANUAL DO CRONOGRAMA
+ * MANUTENÇÃO MANUAL DO CRONOGRAMA
  * ============================================================================
  */
-
-/**
- * Define manualmente o próximo protocolo a ser executado
- * Exemplo: definirFaseManual(5)
- * @param {number} numero - Número do protocolo (ID)
- */
 function definirFaseManual(numero) {
-  const num = parseInt(numero, 10);
-  if (isNaN(num) || num < 1) {
-    Logger.log("[ERRO] Informe um número inteiro válido maior ou igual a 1.");
-    return;
-  }
+  const num = parseInt(numero || 5, 10);
   PropertiesService.getScriptProperties().setProperty(CONFIG_MFMA.PROP_KEY_FASE_ATUAL, String(num));
   Logger.log(`[MANUTENÇÃO] Ponteiro do Protocolo MFMA ajustado manualmente para #${num}.`);
 }
 
-/**
- * Reseta o ponteiro do cronograma para o primeiro protocolo (ID 1)
- */
 function definirFaseInicial() {
   definirFaseManual(1);
 }
 
-/**
- * Exibe no Logger o status atual do ponteiro do cronograma
- */
 function exibirStatusAtual() {
   const idAtual = PropertiesService.getScriptProperties().getProperty(CONFIG_MFMA.PROP_KEY_FASE_ATUAL) || "1";
   Logger.log(`[STATUS DO CRONOGRAMA] Próximo Protocolo a ser executado: #${idAtual}`);
