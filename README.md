@@ -12,7 +12,25 @@ O **Protocolo MFMA** é um manual prático baseado em evidências científicas q
 3. **Fase 3 (Noite):** Desaceleração neural, higiene do sono, modulação de iluminação e suspiro fisiológico para sono restaurador.
 4. **SOS Recuperação:** Protocolo de reset circadiano e mitigações para noites mal dormidas.
 
-Este projeto extrai o conteúdo integral do manual confidencial, estrutura as diretrizes em um dataset padronizado (`Protocolo-MFMA.csv`) e automatiza a atualização diária das notas de uma tarefa fixa no Google Tasks.
+Este projeto extrai o conteúdo integral do manual, estrutura as diretrizes no dataset `Protocolo-MFMA.csv` e automatiza a atualização de **3 Tarefas Diárias por Turno** no Google Tasks, refletindo fielmente a rotina circadiana.
+
+---
+
+## 🏗️ Arquitetura da Automação (Opção A - 3 Tarefas Diárias)
+
+Em vez de um cronograma linear (1 ID por dia ao longo de 16 dias), o script foi rearquitetado para gerenciar diariamente **3 tarefas simultâneas**, cobrindo o dia inteiro do usuário:
+
+1. **⚡ Protocolo MFMA: Rotina da Manhã**
+   - **Vencimento:** 07:00 de HOJE.
+   - **Notas:** Itens consolidados da Fase 1 (Respiração Wim Hof, Cardio, Banho Frio, etc.) e protocolo de SOS matinal (se houver).
+
+2. **⚡ Protocolo MFMA: Rotina da Tarde**
+   - **Vencimento:** 13:00 de HOJE.
+   - **Notas:** Itens consolidados da Fase 2 (Treino, Almoço, NSDR, Foco Imersivo) e protocolo de SOS de tarde.
+
+3. **⚡ Protocolo MFMA: Rotina da Noite & Sono**
+   - **Vencimento:** 20:30 de HOJE.
+   - **Notas:** Itens consolidados da Fase 3 (Desaceleração Neural, Higiene do Sono).
 
 ---
 
@@ -22,27 +40,10 @@ Este projeto extrai o conteúdo integral do manual confidencial, estrutura as di
 Protocolo-MFMA/
 ├── Manual-de-Bolso-MFMA.pdf   # Documento PDF fonte original
 ├── Protocolo-MFMA.csv         # Dataset consolidado e estruturado (UTF-8)
-├── Protocolo-MFMA.js          # Script Google Apps Script com arquitetura de resiliência
+├── Protocolo-MFMA.js          # Script Google Apps Script com arquitetura circadiana
 ├── requirements.txt           # Dependências Python para extração de dados
 └── README.md                  # Manual de documentação e implantação
 ```
-
----
-
-## 📊 Estrutura do Dataset (`Protocolo-MFMA.csv`)
-
-O arquivo CSV foi consolidado com 16 módulos estruturados em 8 colunas:
-
-| Coluna | Descrição | Exemplo |
-| :--- | :--- | :--- |
-| **`ID`** | Identificador sequencial do protocolo (1 a 16). | `1` |
-| **`Fase_Modulo`** | Fase da rotina ou módulo específico. | `Fase 1 (Manhã)` |
-| **`Horario_Janela`** | Janela horária ideal para execução. | `Ao acordar (Primeiras horas)` |
-| **`Categoria`** | Eixo funcional do protocolo. | `Despertar & Respiração` |
-| **`Protocolo`** | Nome da técnica ou diretriz. | `Respiração Wim Hof` |
-| **`Objetivo_Beneficio`** | Justificativa biológica e impacto neurofuncional. | `Oxigenação profunda e aumento de foco.` |
-| **`Instrucoes_Acao`** | Passo a passo operacional detalhado. | `1. 30 respirações rápidas... 2. Apneia...` |
-| **`Dicas_Cuidados`** | Recomendações de segurança e otimizações práticas. | `Nunca realizar na água ou dirigindo.` |
 
 ---
 
@@ -66,9 +67,9 @@ O arquivo CSV foi consolidado com 16 módulos estruturados em 8 colunas:
 ### Passo 4: Validação com Teste Imediato
 1. No seletor de funções no topo do Apps Script, selecione `executarTesteImediatoAgora`.
 2. Clique em **Executar** e conceda as permissões de autorização da sua conta Google.
-3. Se você ainda não possuir uma tarefa criada, o script **criará automaticamente** a tarefa no Google Tarefas com vencimento para **+2 minutos**, permitindo validar o disparo de notificação push no seu celular ou desktop imediatamente.
+3. O script criará as 3 tarefas no seu Google Tasks com alertas imediatos para os próximos **2, 4 e 6 minutos**.
 
-### Passo 5: Configurar o Trigger Diário Automático
+### Passo 5: Configurar o Trigger Diário Automático (Gatilho da Madrugada)
 1. Na barra lateral esquerda do Apps Script, clique no ícone de relógio (**Acionadores** / *Triggers*).
 2. Clique em **+ Adicionar acionador** (canto inferior direito).
 3. Configure:
@@ -76,27 +77,14 @@ O arquivo CSV foi consolidado com 16 módulos estruturados em 8 colunas:
    - **Implantação:** `Head`
    - **Origem do evento:** `Baseado no tempo`
    - **Tipo de acionador:** `Temporizador diário`
-   - **Hora do dia:** `Das 04:00 às 05:00` (ou o horário de sua preferência antes do despertar)
+   - **Hora do dia:** `Das 04:00 às 05:00` (Gatilho da madrugada que limpa/atualiza e reativa as tarefas para a data atual)
 4. Clique em **Salvar**.
-
----
-
-## 🛠️ Funções Utilitárias & Manutenção Manual
-
-O script dispõe de funções prontas para gerenciamento manual:
-
-- **`executarTesteImediatoAgora()`**: Dispara o teste imediato com auto-criação de tarefa sem consumir/avançar o cronograma sequencial.
-- **`testarProtocoloEspecifico(numeroId)`**: Injeta instantaneamente um protocolo específico (ex: `testarProtocoloEspecifico(9)` para testar a diretriz de *NSDR*).
-- **`definirFaseManual(numeroId)`**: Ajusta o ponteiro da próxima execução para um ID desejado (ex: `definirFaseManual(1)`).
-- **`definirFaseInicial()`**: Reseta o ponteiro de execução para o Protocolo #1.
-- **`exibirStatusAtual()`**: Registra no log de execução o ID do próximo protocolo a ser processado.
 
 ---
 
 ## 🛡️ Robustez & Resiliência Arquitetural
 
 - **Busca Multilista com Paginação:** Percorre todas as listas de tarefas da conta utilizando `nextPageToken`.
-- **Flags `showCompleted` e `showHidden`:** Localiza a tarefa mesmo se o usuário tiver marcado como concluída ou se ela estiver oculta.
-- **Reativação Automática:** Ao atualizar as notas, redefine `status: "needsAction"` e `completed: null`, recolocando a tarefa ativa na lista diária.
-- **Normalização Unicode NFD:** Comparação resiliente de títulos imune a acentos, caixas alta/baixa ou formatações móveis.
-- **Fallback de Identificadores:** Compatibilidade garantida tanto para `Tasks` quanto `GoogleTasks`.
+- **Flags `showCompleted` e `showHidden`:** Localiza as 3 tarefas mesmo se o usuário tiver marcado como concluídas ou se estiverem ocultas, reativando-as diariamente.
+- **Reativação Limpa:** Ao atualizar as notas, redefine `status: "needsAction"` e `completed: null`, recolocando as tarefas como pendentes a cada madrugada.
+- **Cravação Mandatória da Data:** Redefine o campo `due` diariamente para "HOJE" em formato ISO (07:00, 13:00 e 20:30), prevenindo o acúmulo de atraso de notificações.
