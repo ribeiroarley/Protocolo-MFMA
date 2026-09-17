@@ -109,22 +109,72 @@ function processarTurnos(opcoes) {
 
     if (itensFase.length === 0) return;
 
-    let textoNotas = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-    itensFase.forEach(item => {
+    let turnoNome = tarefaConfig.titulo.split(": ")[1] || "ROTINA";
+    let textoNotas = `⚡ ${turnoNome.toUpperCase()} (${itensFase.length} Práticas)\n\n`;
+
+    itensFase.forEach((item) => {
       const emoji = EMOJIS_CATEGORIA[item.categoria] || "⚡";
-      textoNotas += `${emoji} [${item.horarioJanela}] ${item.protocolo}\n`;
-      textoNotas += `   ↳ ${item.instrucoes.replace(/\n/g, '\n   ')}\n\n`;
+      textoNotas += `━━━━━━━━━━━━━━━━━━━━━\n`;
+      textoNotas += `${emoji} ${item.protocolo.toUpperCase()}\n`;
+      textoNotas += `⏰ Horário / Momento: ${item.horarioJanela}\n`;
+      if (item.objetivo) {
+        textoNotas += `🎯 Impacto: ${item.objetivo}\n`;
+      }
+      textoNotas += `\nPasso a Passo:\n`;
+      
+      let instrucoesFormatadas = item.instrucoes.split('\n').map(linha => {
+        let l = linha.trim();
+        l = l.replace(/^\d+\.\s*/, '');
+        l = l.replace(/^-\s*/, '');
+        if (l) {
+          return `  • ${l}`;
+        }
+        return '';
+      }).filter(l => l).join('\n');
+      
+      textoNotas += `${instrucoesFormatadas}\n`;
+
+      if (item.dicas) {
+        textoNotas += `\n💡 Dica: ${item.dicas}\n`;
+      }
+      
+      textoNotas += `\n`;
     });
 
     if (itensSOS.length > 0) {
-      textoNotas += `⚠️ SOS Recuperação (se dormiu mal):\n`;
+      textoNotas += `━━━━━━━━━━━━━━━━━━━━━\n`;
+      textoNotas += `⚠️ SOS RECUPERAÇÃO (${itensSOS.length} Práticas)\n\n`;
       itensSOS.forEach(item => {
         const emoji = EMOJIS_CATEGORIA[item.categoria] || "🔋";
-        textoNotas += `${emoji} [${item.horarioJanela}] ${item.protocolo}\n`;
-        textoNotas += `   ↳ ${item.instrucoes.replace(/\n/g, '\n   ')}\n\n`;
+        textoNotas += `━━━━━━━━━━━━━━━━━━━━━\n`;
+        textoNotas += `${emoji} ${item.protocolo.toUpperCase()}\n`;
+        textoNotas += `⏰ Horário / Momento: ${item.horarioJanela}\n`;
+        if (item.objetivo) {
+          textoNotas += `🎯 Impacto: ${item.objetivo}\n`;
+        }
+        textoNotas += `\nPasso a Passo:\n`;
+        
+        let instrucoesFormatadas = item.instrucoes.split('\n').map(linha => {
+          let l = linha.trim();
+          l = l.replace(/^\d+\.\s*/, '');
+          l = l.replace(/^-\s*/, '');
+          if (l) {
+            return `  • ${l}`;
+          }
+          return '';
+        }).filter(l => l).join('\n');
+        
+        textoNotas += `${instrucoesFormatadas}\n`;
+
+        if (item.dicas) {
+          textoNotas += `\n💡 Dica: ${item.dicas}\n`;
+        }
+        
+        textoNotas += `\n`;
       });
     }
-    textoNotas += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🧠 Otimização diária baseada em neurociência e ritmo circadiano.`;
+
+    textoNotas += `━━━━━━━━━━━━━━━━━━━━━\n🧠 Otimização diária baseada em neurociência e ritmo circadiano.`;
 
     let dataVencimento;
     if (opcoes.testeImediato) {
